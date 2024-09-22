@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>剪刀石頭布遊戲</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script> <!-- 引入SweetAlert2 -->
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            text-align: center;
+            margin-top: 50px;
+            transition: background-color 0.5s;
+            background-color: #f0f0f0;
+            color: #333;
+            overflow: hidden;
+        }
+        h1 {
+            font-size: 48px;
+            color: #ff4081;
+            animation: bounce 1s infinite alternate;
+        }
+        @keyframes bounce {
+            from { transform: translateY(0); }
+            to { transform: translateY(-10px); }
+        }
+        img {
+            width: 100px;
+            height: 100px;
+            margin: 10px;
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        img:hover {
+            transform: scale(1.1);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+        }
+        img:active {
+            transform: scale(0.95) rotate(5deg);
+        }
+    </style>
+</head>
+<body>
+    <h1>剪刀石頭布</h1>
+
+    <!-- 使用圖片替換按鈕 -->
+    <img src="rock2.png" alt="石頭" onclick="play('rock')">
+    <img src="paper.png" alt="布" onclick="play('paper')">
+    <img src="scissors.png" alt="剪刀" onclick="play('scissors')">
+
+    <!-- 音效文件 -->
+    <audio id="winSound" src="win.mp3"></audio>
+    <audio id="loseSound" src="lose.mp3"></audio>
+    <audio id="drawSound" src="draw.mp3"></audio>
+
+    <script>
+        let playerWins = 0;
+        let computerWins = 0;
+
+        function play(userChoice) {
+            const choices = ['rock', 'paper', 'scissors'];
+            const computerChoice = choices[Math.floor(Math.random() * choices.length)];
+            let result;
+            let resultMessage;
+
+            // 獲取音效元素
+            const winSound = document.getElementById('winSound');
+            const loseSound = document.getElementById('loseSound');
+            const drawSound = document.getElementById('drawSound');
+
+            if (userChoice === computerChoice) {
+                result = "平局！";
+                resultMessage = `<span style="color: #FFD700;">你選擇了: ${userChoice}<br>電腦選擇了: ${computerChoice}<br>結果: 平局！</span>`;
+                document.body.style.backgroundColor = '#ffe0b2'; /* 淺黃色 */
+                drawSound.play(); // 播放平手音效
+            } else if (
+                (userChoice === 'rock' && computerChoice === 'scissors') ||
+                (userChoice === 'scissors' && computerChoice === 'paper') ||
+                (userChoice === 'paper' && computerChoice === 'rock')
+            ) {
+                result = "你贏了！";
+                playerWins++;
+                resultMessage = `<span style="color: #1E90FF;">你選擇了: ${userChoice}<br>電腦選擇了: ${computerChoice}<br>結果: 你贏了！</span>`;
+                document.body.style.backgroundColor = '#c8e6c9'; /* 淺綠色 */
+                winSound.play(); // 播放贏的音效
+            } else {
+                result = "你輸了！";
+                computerWins++;
+                resultMessage = `<span style="color: #FFA500;">你選擇了: ${userChoice}<br>電腦選擇了: ${computerChoice}<br>結果: 你輸了！</span>`;
+                document.body.style.backgroundColor = '#ffccbc'; /* 淺紅色 */
+                loseSound.play(); // 播放輸的音效
+            }
+
+            // 使用SweetAlert2彈出結果框
+            Swal.fire({
+                title: result,
+                html: `${resultMessage}<br><br>玩家勝利次數: ${playerWins}<br>電腦勝利次數: ${computerWins}`,
+                icon: result === "你贏了！" ? 'success' : result === "你輸了！" ? 'error' : 'info',
+                confirmButtonText: '繼續',
+                confirmButtonColor: '#3085d6'
+            }).then(() => {
+                // 判斷是否有一方先取得三次勝利
+                if (playerWins === 3 || computerWins === 3) {
+                    let finalResult = playerWins === 3 ? '恭喜你！你贏了整場比賽！' : '可惜，電腦贏了整場比賽！';
+
+                    Swal.fire({
+                        title: '比賽結束',
+                        text: finalResult,
+                        icon: playerWins === 3 ? 'success' : 'error',
+                        confirmButtonText: '重新開始',
+                        confirmButtonColor: '#3085d6'
+                    }).then(() => {
+                        // 重置勝利次數，重新開始遊戲
+                        playerWins = 0;
+                        computerWins = 0;
+                        document.body.style.backgroundColor = '#f0f0f0'; // 重置背景顏色
+                    });
+                }
+            });
+        }
+    </script>
+</body>
+</html>
